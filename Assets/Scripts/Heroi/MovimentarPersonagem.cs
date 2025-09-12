@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MovimentarPersonagem : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class MovimentarPersonagem : MonoBehaviour
     public float velocidade = 6f;
     public float alturaPulo = 2f;
     public float gravidade = -20f;
+    private int vida = 100;
+    public Slider sliderVida;
 
     public AudioClip somPulo;
     public AudioClip somPasso;
@@ -61,6 +64,12 @@ public class MovimentarPersonagem : MonoBehaviour
     {
         RaycastHit hit;
         levantarBloqueado = Physics.Raycast(cameraTransform.position, Vector3.up, out hit, 1.1f);
+    }
+
+    public void AtualizarVida(int novaVida)
+    {
+        vida = Mathf.CeilToInt(Mathf.Clamp(vida + novaVida, 0, 100));
+        sliderVida.value = vida;
     }
 
     void Update()

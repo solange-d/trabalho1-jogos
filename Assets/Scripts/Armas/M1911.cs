@@ -111,6 +111,14 @@ public class M1911 : MonoBehaviour
                 Vector3 direcaoBala = ray.direction;
                 hit.rigidbody.AddForceAtPosition(direcaoBala * 500, hit.point);
             }
+            else
+            {
+                if(hit.transform.tag == "LevarDano")
+                {
+                    ILevarDano levarDano = hit.transform.GetComponent<ILevarDano>();
+                    levarDano.LevarDano(5);
+                }
+            }
         }
 
         yield return new WaitForSeconds(0.9f);
