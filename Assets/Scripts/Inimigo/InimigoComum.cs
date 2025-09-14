@@ -11,6 +11,8 @@ public class InimigoComum : MonoBehaviour, ILevarDano
     private GameObject player;
     private Animator anim;
     private AudioSource audioSource;
+    private FieldOfView fov;
+    private PatrulharAleatorio pal;
 
     public float distanciaDoAtaque = 2.0f;
     public int vida = 50;
@@ -23,15 +25,28 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         player = GameObject.FindWithTag("Player");
         anim = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
+        fov = GetComponent<FieldOfView>();
+        pal = GetComponent<PatrulharAleatorio>();
     }
 
     void Update()
     {
-        VaiAtrasJogador();
-        OlharParaJogador();
         if (vida <= 0)
         {
             Morrer();
+            return;
+        }
+
+        if (fov.podeVerPlayer)
+        {
+            VaiAtrasJogador();
+        }
+        else
+        {
+            anim.SetBool("pararAtaque", true);
+            CorrigirRigiSair();
+            agente.isStopped = false;
+            pal.Andar();
         }
     }
 
@@ -61,13 +76,6 @@ public class InimigoComum : MonoBehaviour, ILevarDano
             agente.SetDestination(player.transform.position);
             anim.ResetTrigger("ataque");
         }
-    }
-
-    private void OlharParaJogador()
-    {
-        Vector3 direcaoOlhar = player.transform.position - transform.position;
-        Quaternion rotacao = Quaternion.LookRotation(direcaoOlhar);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, rotacao, Time.deltaTime * 300);
     }
 
     private void CorrigirRigiEntrar()

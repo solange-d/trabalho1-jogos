@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MovimentarPersonagem : MonoBehaviour
 {
@@ -35,45 +36,14 @@ public class MovimentarPersonagem : MonoBehaviour
         audioSrc = GetComponent<AudioSource>();
     }
 
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(checaChao.position, raioEsfera);
-    }
-
-    private void AgacharLevantar()
-    {
-        if (levantarBloqueado || estaNoChao == false)
-        {
-            return;
-        }
-        estahAbaixado = !estahAbaixado;
-        if (estahAbaixado)
-        {
-            controle.height = alturaAbaixado;
-            cameraTransform.localPosition = new Vector3(0, posicaoCameraAbaixado, 0);
-        }
-        else
-        {
-            controle.height = alturaLevantado;
-            cameraTransform.localPosition = new Vector3(0, posicaoCameraEmPe, 0);
-        }
-    }
-
-    private void ChecarBloqueioAbaixado()
-    {
-        RaycastHit hit;
-        levantarBloqueado = Physics.Raycast(cameraTransform.position, Vector3.up, out hit, 1.1f);
-    }
-
-    public void AtualizarVida(int novaVida)
-    {
-        vida = Mathf.CeilToInt(Mathf.Clamp(vida + novaVida, 0, 100));
-        sliderVida.value = vida;
-    }
 
     void Update()
     {
+        if (vida<=0)
+        {
+            FimdeJogo();
+            return;
+        }
         estaNoChao = Physics.CheckSphere(checaChao.position, raioEsfera, chaoMask);
 
         float x = Input.GetAxis("Horizontal");
@@ -120,4 +90,57 @@ public class MovimentarPersonagem : MonoBehaviour
             }
         }
     }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(checaChao.position, raioEsfera);
+    }
+
+    private void AgacharLevantar()
+    {
+        if (levantarBloqueado || estaNoChao == false)
+        {
+            return;
+        }
+        estahAbaixado = !estahAbaixado;
+        if (estahAbaixado)
+        {
+            controle.height = alturaAbaixado;
+            cameraTransform.localPosition = new Vector3(0, posicaoCameraAbaixado, 0);
+        }
+        else
+        {
+            controle.height = alturaLevantado;
+            cameraTransform.localPosition = new Vector3(0, posicaoCameraEmPe, 0);
+        }
+    }
+
+    private void ChecarBloqueioAbaixado()
+    {
+        RaycastHit hit;
+        levantarBloqueado = Physics.Raycast(cameraTransform.position, Vector3.up, out hit, 1.1f);
+    }
+
+    public void AtualizarVida(int novaVida)
+    {
+        vida = Mathf.CeilToInt(Mathf.Clamp(vida + novaVida, 0, 100));
+        sliderVida.value = vida;
+    }
+
+    private void FimdeJogo()
+    {
+        //desativa varios componentes
+       // Time.timeScale = 0; // vai de 0 a 1 ... 1 é a velocidade normal... 0 é parado
+                            // entre 0 e 1 é possivel configurar camera lenta
+       // Camera.main.GetComponent<AudioListener>().enabled = false;
+
+       // GetComponentInChildren<M1911>().enabled = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        SceneManager.LoadScene(0);
+
+    }
+
 }
