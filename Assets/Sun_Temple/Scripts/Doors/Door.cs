@@ -30,6 +30,13 @@ namespace SunTemple
 
 		private bool scriptIsEnabled = true;
 
+        [Header("Feedback")]
+        public AudioClip unlockSound;
+        private AudioSource audioSource;   
+
+        public Renderer doorRenderer;      
+        public Color highlightColor = Color.yellow;
+        private Color originalColor;
 
 
         void Start(){
@@ -62,7 +69,12 @@ namespace SunTemple
 				cursor.SetCursorToDefault ();
 			}
 
-					
+            audioSource = GetComponent<AudioSource>();
+
+            if (doorRenderer != null)
+                originalColor = doorRenderer.material.color;
+
+
         }
 
 
@@ -182,6 +194,28 @@ namespace SunTemple
             EndAngle = transform.localEulerAngles.y - OpenRotationAmount;
             CurrentLerpTime = 0;
             Rotating = true;
+        }
+
+        public void UnlockWithFeedback()
+        {
+            IsLocked = false;
+
+            // Tocar som
+            if (audioSource != null && unlockSound != null)
+                audioSource.PlayOneShot(unlockSound);
+
+            // Iluminar a porta
+            if (doorRenderer != null)
+                doorRenderer.material.color = highlightColor;
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag(playerTag) && !IsLocked)
+            {
+                if (doorRenderer != null)
+                    doorRenderer.material.color = originalColor;
+            }
         }
 
     }

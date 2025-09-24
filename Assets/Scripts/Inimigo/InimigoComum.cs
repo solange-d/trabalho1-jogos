@@ -1,25 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Video;
+using System;
 
 public class InimigoComum : MonoBehaviour, ILevarDano
 {
-    private NavMeshAgent agente;
-    private GameObject player;
-    private Animator anim;
-    private AudioSource audioSource;
-    private FieldOfView fov;
-    private PatrulharAleatorio pal;
+    protected NavMeshAgent agente;
+    protected GameObject player;
+    protected Animator anim;
+    protected AudioSource audioSource;
+    protected FieldOfView fov;
+    protected PatrulharAleatorio pal;
 
+    [Header("Atributos Base")]
     public float distanciaDoAtaque = 2.0f;
     public int vida = 50;
+    public int danoBase = 10;
+
+    [Header("Sons")]
     public AudioClip somMorte;
     public AudioClip somPasso;
 
-    void Start()
+    protected bool jaMorreu = false;
+
+    public static event Action<InimigoComum> OnInimigoMorreu;
+
+    protected virtual void Start()
     {
         agente = GetComponent<NavMeshAgent>();
         player = GameObject.FindWithTag("Player");
@@ -27,9 +34,37 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         audioSource = GetComponent<AudioSource>();
         fov = GetComponent<FieldOfView>();
         pal = GetComponent<PatrulharAleatorio>();
+
+        AplicarDificuldade();
     }
 
-    void Update()
+    private void AplicarDificuldade()
+    {
+        if (GameManager.Instance == null) return;
+
+        switch (GameManager.Instance.dificuldadeAtual)
+        {
+            case GameManager.Dificuldade.Facil:
+                vida = 30;
+                agente.speed = 2f;
+                danoBase = 5;
+                break;
+
+            case GameManager.Dificuldade.Medio:
+                vida = 50;
+                agente.speed = 3.5f;
+                danoBase = 10;
+                break;
+
+            case GameManager.Dificuldade.Dificil:
+                vida = 70;
+                agente.speed = 5f;
+                danoBase = 15;
+                break;
+        }
+    }
+
+    protected virtual void Update()
     {
         if (vida <= 0)
         {
@@ -50,20 +85,18 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         }
     }
 
-    private void VaiAtrasJogador()
+    protected virtual void VaiAtrasJogador()
     {
         float distanciaDoPlayer = Vector3.Distance(transform.position, player.transform.position);
         if (distanciaDoPlayer < distanciaDoAtaque)
         {
             agente.isStopped = true;
-            Debug.Log("Ataque");
             anim.SetTrigger("ataque");
             anim.SetBool("podeAndar", false);
             anim.SetBool("pararAtaque", false);
             CorrigirRigiEntrar();
         }
 
-        // player se afastou
         if (distanciaDoPlayer >= 3)
         {
             anim.SetBool("pararAtaque", true);
@@ -88,35 +121,83 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         GetComponent<Rigidbody>().isKinematic = false;
     }
 
-    public void LevarDano(int dano)
+    public virtual void LevarDano(int dano)
     {
+        if (jaMorreu) return;
+
         vida -= dano;
+
+        if (vida <= 0)
+        {
+            Morrer();
+            return;
+        }
+
         agente.isStopped = true;
         anim.SetTrigger("levouTiro");
         anim.SetBool("podeAndar", false);
     }
 
-    public void Morrer()
+    public virtual void Morrer()
     {
-        audioSource.clip = somMorte;
-        audioSource.Play();
+        if (jaMorreu) return;
+        jaMorreu = true;
 
-        agente.isStopped = true;
-        anim.SetBool("podeAndar", false);
-        anim.SetBool("pararAtaque", true);
+        OnInimigoMorreu?.Invoke(this);
 
-        anim.SetBool("morreu", true);
-        this.enabled = false;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegistrarMorte();
+        }
+
+        if (audioSource != null && somMorte != null)
+            audioSource.PlayOneShot(somMorte);
+
+        if (agente != null)
+        {
+            agente.isStopped = true;
+            agente.enabled = false;
+        }
+
+        if (pal != null)
+            pal.enabled = false;
+
+        if (fov != null)
+            fov.enabled = false;
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+            rb.detectCollisions = false;
+        }
+
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+        {
+            col.isTrigger = true;
+        }
+
+        if (anim != null)
+        {
+            anim.SetBool("podeAndar", false);
+            anim.SetBool("pararAtaque", true);
+            anim.SetBool("morreu", true);
+        }
     }
 
-    public void DarDano()
+    public virtual void DarDano()
     {
-        player.GetComponent<MovimentarPersonagem>().AtualizarVida(-10);
+        if (jaMorreu) return;
+        player.GetComponent<MovimentarPersonagem>().AtualizarVida(-danoBase);
     }
 
     public void Passo()
     {
-        //ideal para sons repetitivos
-        audioSource.PlayOneShot(somPasso, 0.05f);
+        if (audioSource != null && somPasso != null)
+            audioSource.PlayOneShot(somPasso, 0.05f);
     }
 }

@@ -116,7 +116,7 @@ public class M1911 : MonoBehaviour
                 if(hit.transform.tag == "LevarDano")
                 {
                     ILevarDano levarDano = hit.transform.GetComponent<ILevarDano>();
-                    levarDano.LevarDano(5);
+                    levarDano.LevarDano(100);
                 }
             }
         }
