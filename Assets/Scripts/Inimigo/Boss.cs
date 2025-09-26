@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Boss : InimigoComum
@@ -37,7 +35,6 @@ public class Boss : InimigoComum
                 distanciaDoAtaque = 5f;
                 break;
         }
- 
     }
 
     public override void LevarDano(int dano)
@@ -46,4 +43,12 @@ public class Boss : InimigoComum
         base.LevarDano(dano);
     }
 
+    public override void Morrer()
+    {
+        base.Morrer();
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegistrarMorteBoss();
+        }
+    }
 }

@@ -182,6 +182,7 @@ namespace SunTemple
             EndAngle =  StartRotation.y + OpenRotationAmount;
             CurrentLerpTime = 0;
             Rotating = true;
+            DoorCollider.isTrigger = false;
         }
 
 
@@ -194,6 +195,7 @@ namespace SunTemple
             EndAngle = transform.localEulerAngles.y - OpenRotationAmount;
             CurrentLerpTime = 0;
             Rotating = true;
+            DoorCollider.isTrigger = false;
         }
 
         public void UnlockWithFeedback()

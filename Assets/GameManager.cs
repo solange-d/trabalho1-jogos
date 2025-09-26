@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,7 +11,15 @@ public class GameManager : MonoBehaviour
 
     [Header("HUD")]
     public TMP_Text textoInimigosMortos;
+    public TMP_Text textoPontuacao;
+    public TMP_Text mensagemEspecial;
+
+    [Header("Configuração")]
+    public float duracaoMensagemEspecial = 3f; // duração que a mensagem aparece
+
     private int inimigosMortos = 0;
+    private int pontuacao = 0;
+    private bool bossPontuado = false;
 
     private void Awake()
     {
@@ -24,6 +31,7 @@ public class GameManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
     }
 
@@ -39,9 +47,12 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Procura automaticamente o Text na nova cena
+        // Reconecta os elementos do HUD
         textoInimigosMortos = GameObject.Find("TextoInimigos")?.GetComponent<TMP_Text>();
-        AtualizarTextoInimigos();
+        textoPontuacao = GameObject.Find("TextoPontuacao")?.GetComponent<TMP_Text>();
+        mensagemEspecial = GameObject.Find("MensagemEspecial")?.GetComponent<TMP_Text>();
+
+        AtualizarHUD();
     }
 
     public void DefinirDificuldade(string nivel)
@@ -56,21 +67,63 @@ public class GameManager : MonoBehaviour
         Debug.Log("Dificuldade escolhida: " + dificuldadeAtual);
     }
 
+    // Registrar morte de inimigo comum
     public void RegistrarMorte()
     {
         inimigosMortos++;
-        AtualizarTextoInimigos();
+        pontuacao += 10;
+        AtualizarHUD();
     }
 
-    private void AtualizarTextoInimigos()
+    // Registrar morte do boss
+    public void RegistrarMorteBoss()
+    {
+        if (bossPontuado) return;
+        inimigosMortos++;
+        pontuacao += 30;
+        AtualizarHUD();
+        bossPontuado = true;
+    }
+
+    // Mostrar mensagem especial
+    public void MostrarMensagemEspecial(string mensagem)
+    {
+        if (mensagemEspecial == null) return;
+        StopAllCoroutines();
+        StartCoroutine(ExibirMensagemCoroutine(mensagem));
+    }
+
+    private System.Collections.IEnumerator ExibirMensagemCoroutine(string mensagem)
+    {
+        mensagemEspecial.text = mensagem;
+        mensagemEspecial.enabled = true;
+        yield return new WaitForSeconds(duracaoMensagemEspecial);
+        mensagemEspecial.text = "";
+        mensagemEspecial.enabled = false;
+    }
+
+    // Atualiza HUD de inimigos e pontuação
+    private void AtualizarHUD()
     {
         if (textoInimigosMortos != null)
-            textoInimigosMortos.text = "Mutantes Mortos: " + inimigosMortos.ToString();
+            textoInimigosMortos.text = "Mutantes Mortos: " + inimigosMortos;
+
+        if (textoPontuacao != null)
+            textoPontuacao.text = "Pontuação: " + pontuacao;
     }
 
-    public void ResetarInimigos()
+    // Reset total para novo jogo
+    public void ResetarProgresso()
     {
         inimigosMortos = 0;
-        AtualizarTextoInimigos();
+        pontuacao = 0;
+        bossPontuado = false;
+        AtualizarHUD();
+
+        if (mensagemEspecial != null)
+        {
+            mensagemEspecial.text = "";
+            mensagemEspecial.enabled = false;
+        }
     }
 }

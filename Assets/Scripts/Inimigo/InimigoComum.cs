@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.AI;
-using System;
 
 public class InimigoComum : MonoBehaviour, ILevarDano
 {
@@ -23,7 +21,6 @@ public class InimigoComum : MonoBehaviour, ILevarDano
     public AudioClip somPasso;
 
     protected bool jaMorreu = false;
-
     public static event Action<InimigoComum> OnInimigoMorreu;
 
     protected virtual void Start()
@@ -34,7 +31,6 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         audioSource = GetComponent<AudioSource>();
         fov = GetComponent<FieldOfView>();
         pal = GetComponent<PatrulharAleatorio>();
-
         AplicarDificuldade();
     }
 
@@ -88,6 +84,7 @@ public class InimigoComum : MonoBehaviour, ILevarDano
     protected virtual void VaiAtrasJogador()
     {
         float distanciaDoPlayer = Vector3.Distance(transform.position, player.transform.position);
+
         if (distanciaDoPlayer < distanciaDoAtaque)
         {
             agente.isStopped = true;
@@ -141,11 +138,11 @@ public class InimigoComum : MonoBehaviour, ILevarDano
     public virtual void Morrer()
     {
         if (jaMorreu) return;
-        jaMorreu = true;
 
+        jaMorreu = true;
         OnInimigoMorreu?.Invoke(this);
 
-        if (GameManager.Instance != null)
+        if (GameManager.Instance != null && !(this is Boss))
         {
             GameManager.Instance.RegistrarMorte();
         }
@@ -159,11 +156,8 @@ public class InimigoComum : MonoBehaviour, ILevarDano
             agente.enabled = false;
         }
 
-        if (pal != null)
-            pal.enabled = false;
-
-        if (fov != null)
-            fov.enabled = false;
+        if (pal != null) pal.enabled = false;
+        if (fov != null) fov.enabled = false;
 
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
@@ -192,6 +186,7 @@ public class InimigoComum : MonoBehaviour, ILevarDano
     public virtual void DarDano()
     {
         if (jaMorreu) return;
+
         player.GetComponent<MovimentarPersonagem>().AtualizarVida(-danoBase);
     }
 
