@@ -131,16 +131,16 @@ public class MovimentarPersonagem : MonoBehaviour
     private void FimdeJogo()
     {
         //desativa varios componentes
-       // Time.timeScale = 0; // vai de 0 a 1 ... 1 é a velocidade normal... 0 é parado
-                            // entre 0 e 1 é possivel configurar camera lenta
-       // Camera.main.GetComponent<AudioListener>().enabled = false;
-
-       // GetComponentInChildren<M1911>().enabled = false;
+        // Time.timeScale = 0; // vai de 0 a 1 ... 1 a velocidade normal... 0  parado
+        // entre 0 e 1 possivel configurar camera lenta
+        // Camera.main.GetComponent<AudioListener>().enabled = false;
+        if (GameManager.Instance != null)
+            GameManager.Instance.ResetarProgresso();
+        // GetComponentInChildren<M1911>().enabled = false;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         SceneManager.LoadScene(0);
-
     }
 
 }
