@@ -34,7 +34,6 @@ public class TempleManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
-        audioSource.volume = 1f;
 
         TrocarMusica(musicaAmbiente);
     }
