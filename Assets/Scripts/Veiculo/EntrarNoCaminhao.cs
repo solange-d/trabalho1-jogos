@@ -3,11 +3,16 @@ using TMPro;
 
 public class EntrarNoCaminhao : MonoBehaviour
 {
+    [Header("Referências Principais")]
     public GameObject player;
     public Camera cameraCaminhao;
     public Camera cameraPlayer;
     public Car scriptCarro;
+    public ArmaCaminhao armaDoCaminhao;
+
+    [Header("UI")]
     public TMP_Text mensagemUI;
+    public GameObject miraUI;
 
     [Header("Configuração de Saída")]
     public Transform pontoDeSaida;
@@ -22,6 +27,8 @@ public class EntrarNoCaminhao : MonoBehaviour
 
         scriptCarro.enabled = false;
         cameraCaminhao.enabled = false;
+        if (armaDoCaminhao != null)
+            armaDoCaminhao.enabled = false;
     }
 
     void Update()
@@ -67,8 +74,17 @@ public class EntrarNoCaminhao : MonoBehaviour
 
         player.SetActive(false);
         cameraPlayer.enabled = false;
+        if (miraUI != null)
+            miraUI.SetActive(false);
+
         cameraCaminhao.enabled = true;
         scriptCarro.enabled = true;
+
+        if (armaDoCaminhao != null)
+        {
+            armaDoCaminhao.enabled = true;
+            armaDoCaminhao.cameraDaArma = this.cameraCaminhao;
+        }
 
         scriptCarro.LigarMotor();
     }
@@ -77,18 +93,28 @@ public class EntrarNoCaminhao : MonoBehaviour
     {
         dentroDoCaminhao = false;
 
+        CharacterController cc = player.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        if (rb != null) { rb.velocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
+
         player.transform.position = pontoDeSaida.position;
         player.transform.rotation = pontoDeSaida.rotation;
 
-        player.SetActive(true); 
+        player.SetActive(true);
+        if (cc != null) cc.enabled = true;
+
         cameraPlayer.enabled = true;
+        if (miraUI != null)
+            miraUI.SetActive(true);
+
         cameraCaminhao.enabled = false;
-        scriptCarro.enabled = false;
+        if (armaDoCaminhao != null)
+            armaDoCaminhao.enabled = false;
 
         scriptCarro.PararCompleto();
-
         scriptCarro.DesligarMotor();
-        
         scriptCarro.enabled = false;
 
         podeEntrar = false;

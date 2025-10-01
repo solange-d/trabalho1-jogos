@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))] // Garante que o caminhão sempre tenha um Rigidbody
+[RequireComponent(typeof(Rigidbody))]
 public class Car : MonoBehaviour
 {
     public float motorForce, streetForce, brakeForce;
