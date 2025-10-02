@@ -15,11 +15,16 @@ public class GameManager : MonoBehaviour
     public TMP_Text mensagemEspecial;
 
     [Header("Configuração")]
-    public float duracaoMensagemEspecial = 3f; // duração que a mensagem aparece
+    public float duracaoMensagemEspecial = 3f;
 
     private int inimigosMortos = 0;
     private int pontuacao = 0;
     private bool bossPontuado = false;
+
+    private int pontuacaoFinal = 0;
+    private string mensagemFinal = "";
+    private bool jogoFinalizado = false;
+
 
     private void Awake()
     {
@@ -47,12 +52,13 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Reconecta os elementos do HUD
-        textoInimigosMortos = GameObject.Find("TextoInimigos")?.GetComponent<TMP_Text>();
-        textoPontuacao = GameObject.Find("TextoPontuacao")?.GetComponent<TMP_Text>();
-        mensagemEspecial = GameObject.Find("MensagemEspecial")?.GetComponent<TMP_Text>();
-
-        AtualizarHUD();
+        if (scene.buildIndex == 1)
+        {
+            textoInimigosMortos = GameObject.Find("TextoInimigos")?.GetComponent<TMP_Text>();
+            textoPontuacao = GameObject.Find("TextoPontuacao")?.GetComponent<TMP_Text>();
+            mensagemEspecial = GameObject.Find("MensagemEspecial")?.GetComponent<TMP_Text>();
+            AtualizarHUD();
+        }
     }
 
     public void DefinirDificuldade(string nivel)
@@ -67,7 +73,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("Dificuldade escolhida: " + dificuldadeAtual);
     }
 
-    // Registrar morte de inimigo comum
     public void RegistrarMorte()
     {
         inimigosMortos++;
@@ -75,7 +80,6 @@ public class GameManager : MonoBehaviour
         AtualizarHUD();
     }
 
-    // Registrar morte do boss
     public void RegistrarMorteBoss()
     {
         if (bossPontuado) return;
@@ -85,7 +89,6 @@ public class GameManager : MonoBehaviour
         bossPontuado = true;
     }
 
-    // Mostrar mensagem especial
     public void MostrarMensagemEspecial(string mensagem)
     {
         if (mensagemEspecial == null) return;
@@ -102,7 +105,6 @@ public class GameManager : MonoBehaviour
         mensagemEspecial.enabled = false;
     }
 
-    // Atualiza HUD de inimigos e pontuação
     private void AtualizarHUD()
     {
         if (textoInimigosMortos != null)
@@ -112,13 +114,15 @@ public class GameManager : MonoBehaviour
             textoPontuacao.text = "Pontuação: " + pontuacao;
     }
 
-    // Reset total para novo jogo
     public void ResetarProgresso()
     {
         inimigosMortos = 0;
         pontuacao = 0;
         bossPontuado = false;
-        AtualizarHUD();
+
+        jogoFinalizado = false;
+        mensagemFinal = "";
+        pontuacaoFinal = 0;
 
         if (mensagemEspecial != null)
         {
@@ -126,4 +130,27 @@ public class GameManager : MonoBehaviour
             mensagemEspecial.enabled = false;
         }
     }
+
+    public void FinalizarJogo(bool vitoria)
+    {
+        jogoFinalizado = true;
+        pontuacaoFinal = pontuacao;
+
+        if (vitoria)
+        {
+            mensagemFinal = "Vitória!";
+        }
+        else
+        {
+            mensagemFinal = "Você Morreu!";
+        }
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        SceneManager.LoadScene(0);
+    }
+
+    public bool JogoFoiFinalizado() { return jogoFinalizado; }
+    public string GetMensagemFinal() { return mensagemFinal; }
+    public int GetPontuacaoFinal() { return pontuacaoFinal; }
 }

@@ -39,7 +39,6 @@ public class M1911 : MonoBehaviour
     {
         if (anim.GetBool("acaoOcorrendo")) return;
 
-        // tiro
         if (Input.GetButtonDown("Fire1") && !estahAtirando)
         {
             if (municao > 0)
@@ -60,7 +59,6 @@ public class M1911 : MonoBehaviour
             }
         }
 
-        // recarregar
         if (Input.GetButtonDown("Recarregar"))
         {
             if (carregador > 0 && municao < 17)
@@ -89,20 +87,17 @@ public class M1911 : MonoBehaviour
 
     IEnumerator Atirando()
     {
-        // centro da tela
         float screenX = Screen.width / 2;
         float screenY = Screen.height / 2;
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(screenX, screenY, 0));
 
         anim.Play("AtirarM1911");
 
-        // efeito visual
         GameObject efeitoTiroObj = Instantiate(efeitoTiro, posEfeitoTiro.transform.position, posEfeitoTiro.transform.rotation);
         efeitoTiroObj.transform.parent = posEfeitoTiro.transform;
 
         GameObject faiscaObj = null;
 
-        // colisão
         if (Physics.SphereCast(ray, 0.1f, out hit))
         {
             faiscaObj = Instantiate(faisca, hit.point, Quaternion.FromToRotation(Vector3.up, hit.normal));

@@ -10,11 +10,15 @@ public class MovimentarPersonagem : MonoBehaviour
     public float velocidade = 6f;
     public float alturaPulo = 2f;
     public float gravidade = -20f;
-    private int vida = 100;
+
+    public int vidaMaxima = 100;
+    private int vida;
     public Slider sliderVida;
+    private bool jaMorreu = false;
 
     public AudioClip somPulo;
     public AudioClip somPasso;
+    public AudioClip somCura;
     private AudioSource audioSrc;
 
     public Transform checaChao;
@@ -34,16 +38,21 @@ public class MovimentarPersonagem : MonoBehaviour
         controle = GetComponent<CharacterController>();
         cameraTransform = Camera.main.transform;
         audioSrc = GetComponent<AudioSource>();
+
+        vida = vidaMaxima;
+        sliderVida.maxValue = vidaMaxima;
+        sliderVida.value = vida;
     }
 
 
     void Update()
-    {
-        if (vida<=0)
+    { 
+        if (vida <= 0 && !jaMorreu)
         {
             FimdeJogo();
             return;
         }
+        if (jaMorreu) return;
         estaNoChao = Physics.CheckSphere(checaChao.position, raioEsfera, chaoMask);
 
         float x = Input.GetAxis("Horizontal");
@@ -122,25 +131,39 @@ public class MovimentarPersonagem : MonoBehaviour
         levantarBloqueado = Physics.Raycast(cameraTransform.position, Vector3.up, out hit, 1.1f);
     }
 
-    public void AtualizarVida(int novaVida)
+    public void AtualizarVida(int valor)
     {
-        vida = Mathf.CeilToInt(Mathf.Clamp(vida + novaVida, 0, 100));
+        vida += valor;
+        vida = Mathf.Clamp(vida, 0, vidaMaxima);
         sliderVida.value = vida;
+    }
+
+    public void CurarPorcentagem(float porcentagem)
+    {
+        if (vida >= vidaMaxima) return;
+
+        int vidaPerdida = vidaMaxima - vida;
+
+        int curaParaAplicar = Mathf.CeilToInt(vidaPerdida * porcentagem);
+
+        AtualizarVida(curaParaAplicar);
+
+        if (somCura != null)
+        {
+            audioSrc.PlayOneShot(somCura);
+        }
     }
 
     private void FimdeJogo()
     {
-        //desativa varios componentes
-        // Time.timeScale = 0; // vai de 0 a 1 ... 1 a velocidade normal... 0  parado
-        // entre 0 e 1 possivel configurar camera lenta
-        // Camera.main.GetComponent<AudioListener>().enabled = false;
-        if (GameManager.Instance != null)
-            GameManager.Instance.ResetarProgresso();
-        // GetComponentInChildren<M1911>().enabled = false;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        jaMorreu = true;
 
-        SceneManager.LoadScene(0);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.FinalizarJogo(false);
+        }
+
+        if (controle != null) controle.enabled = false;
     }
 
 }

@@ -37,7 +37,7 @@ public class FieldOfView : MonoBehaviour
             {
                 Vector3 dirToAvo = (alvo.transform.position - transform.position).normalized;
                 dirToAvo.y = 0;
-                if (Vector3.Angle(transform.forward, dirToAvo) < anguloVisao / 2);
+                if (Vector3.Angle(transform.forward, dirToAvo) < anguloVisao / 2)
                 {
                     float disToAlvo = Vector3.Distance(transform.position, alvo.transform.position);
 

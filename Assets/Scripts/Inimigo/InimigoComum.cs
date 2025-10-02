@@ -75,7 +75,6 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         else
         {
             anim.SetBool("pararAtaque", true);
-            CorrigirRigiSair();
             agente.isStopped = false;
             pal.Andar();
         }
@@ -91,13 +90,11 @@ public class InimigoComum : MonoBehaviour, ILevarDano
             anim.SetTrigger("ataque");
             anim.SetBool("podeAndar", false);
             anim.SetBool("pararAtaque", false);
-            CorrigirRigiEntrar();
         }
 
         if (distanciaDoPlayer >= 3)
         {
             anim.SetBool("pararAtaque", true);
-            CorrigirRigiSair();
         }
 
         if (anim.GetBool("podeAndar"))
@@ -108,15 +105,6 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         }
     }
 
-    private void CorrigirRigiEntrar()
-    {
-        GetComponent<Rigidbody>().isKinematic = true;
-    }
-
-    private void CorrigirRigiSair()
-    {
-        GetComponent<Rigidbody>().isKinematic = false;
-    }
 
     public virtual void LevarDano(int dano)
     {
@@ -162,11 +150,7 @@ public class InimigoComum : MonoBehaviour, ILevarDano
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
             rb.isKinematic = true;
-            rb.constraints = RigidbodyConstraints.FreezeAll;
-            rb.detectCollisions = false;
         }
 
         Collider col = GetComponent<Collider>();
